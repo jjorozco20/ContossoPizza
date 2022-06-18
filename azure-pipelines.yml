@@ -1,0 +1,42 @@
+trigger: none
+
+variables:
+  buildConfiguration: 'Release'
+  wwwrootDir: $(Pipeline.Workspace)
+  dotnetSdkVersion: '6.x'
+
+pool:
+  vmImage: ubuntu-latest # Microsoft-Hosted Agent 
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: jjorozco20/dotnet-template
+      endpoint: taskkk
+
+jobs:
+  - job: buildAndPublish
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK $(dotnetSdkVersion)'
+      inputs:
+        packageType: sdk
+        version: '$(dotnetSdkVersion)'
+    - script: 'echo "$(Build.DefinitionName), $(Build.BuildId), $(Build.BuildNumber)" > buildinfo.txt'
+      displayName: 'Write build info'
+      workingDirectory: $(wwwrootDir)
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore project dependencies'
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
+    - template: build.yml@templates
+      parameters:
+        buildConfiguration: 'Debug'
+    - template: build.yml@templates
+      parameters:
+        buildConfiguration: 'Release'
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: drop'
+      condition: succeeded()
