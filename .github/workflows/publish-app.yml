@@ -5,9 +5,9 @@ on:
     branches: [ production ]
 
 env:
-  AZURE_WEBAPP_NAME: DotNetWeb
+  AZURE_WEBAPP_NAME: ContossoPizza
   AZURE_WEBAPP_PACKAGE_PATH: '.' # Set this to the path to your web app project, defaults to the repository root:
-  DOTNET_VERSION: '5.0.301' # The .NET SDK version to use
+  DOTNET_VERSION: '6.0.301' # The .NET SDK version to use
 
 jobs:
   publish:
@@ -26,13 +26,12 @@ jobs:
       
     - name: Build
       run: |
-        cd DotNet.WebApp
         dotnet build --configuration Release --no-restore
         dotnet publish -c Release -o ../dotnet-webapp -r linux-x64 --self-contained true /p:UseAppHost=true
-    - name: Test
-      run: |
-        cd DotNet.WebApp.Tests
-        dotnet test --no-restore --verbosity normal
+    # - name: Test
+    #   run: |
+    #     cd DotNet.WebApp.Tests
+    #     dotnet test --no-restore --verbosity normal
       
     - uses: azure/webapps-deploy@v2
       name: Deploy
